@@ -43,9 +43,14 @@
 ; --- Programa Principal ---
 inicio:
 				bank1							;Seleciona o banco 1 de memória
-				movlw		h'7F'				;W= B'01111111'
+				movlw		H'FF'				;W = B'11111111'
+				movwf		TRISA				;TRISA = H'FF' (todos os bits são entrada)
+				movlw		h'7F'				;W = B'01111111'
 				movwf		TRISB				;TRISB = H'7F' (apenas o RB7 como saida)
 				bank0							;Seleciona o banco 0 de memória
-				
+				movlw		H'FF'				;W = B'11111111'
+				movwf		PORTB				;RB7 (configurando como saída)	inicia em HIGH
+
+				goto		$					;Segura o código nessa linha	
 
 				end			

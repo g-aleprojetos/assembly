@@ -1,0 +1,299 @@
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;
+                      00002 ; Curso de Assembly
+                      00003 ;
+                      00004 ; 
+                      00005 ; Aciona LED1 ligado em RB1, a partir de um botão ligado em RB0 
+                      00006 ; Aciona LED2 ligado em RB3, a partir de um botão ligado em RB2
+                      00007 ;
+                      00008 ; Obs.:
+                      00009 ;
+                      00010 ; LED ligado no modo current sourcing:
+                      00011 ;
+                      00012 ; '0' - apaga
+                      00013 ; '1' - acende
+                      00014 ;
+                      00015 ; Botão ligado com resistor de pull-up:
+                      00016 ;
+                      00017 ; '0' - botão acionado
+                      00018 ; '1' - botão liberado
+                      00019 ;
+                      00020 ; MCU: PIC16F84A   Clock:4MHz
+                      00021 ;
+                      00022 ; Autor: Alexandre   Data: abril 2021
+                      00023 ;
+                      00024 
+                      00025         list p=16f84A                                                   ;microcontrolador utilizado PIC1
+                            6F84A
+                      00026 
+                      00027 ; --- Arquivo incluídos no projeto ---
+                      00028         #include<pic16f84a.inc>                                 ;inclui o arquivo do PIC16F84A
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F84A processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00208         LIST
+                      00029 
+                      00030 ; --- FUSE Bits ---
+                      00031 
+                      00032 ; Cristal oscilador externo 4MHZ, sem watchdog timer, com power up timer, sem proteção do código
+2007   3FF1           00033         __config _XT_OSC & _WDT_OFF & _PWRTE_ON & _CP_OFF
+                      00034 
+                      00035 
+                      00036 ; --- Paginação de memória ---
+                      00037                                                         ;bcf - bit clear file - limpa o bit colocando em
+                             0
+                      00038         #define         bank0           bcf STATUS,RP0          ;Cria um mnemônico para o banco 0 de mem
+                            ória
+                      00039                                                         ;bsf - bit set file - seta o bit colocando em 1
+                      00040         #define         bank1           bsf STATUS,RP0          ;Cria um mnemônico para o banco 1 de mem
+                            ória
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00041 
+                      00042 ; --- Entradas ---
+                      00043         #define         botao1          PORTB,RB0                       ;Botão 1 ligado em RB0
+                      00044         #define         botao2          PORTB,RB2                       ;Botão 2 ligado em RB2  
+                      00045 
+                      00046 
+                      00047 ; --- Saídas ---
+                      00048         #define         led1            PORTB,RB1                       ;Led 1 ligado em RB1
+                      00049         #define         led2            PORTB,RB3                       ;Led 3 ligado em RB3
+                      00050 
+                      00051 
+                      00052 ; --- Vetor de RESET ---
+0000                  00053                                 org                     H'0000'                         ;Origem no ender
+                            eço 0000h de memória
+0000   2805           00054                                 goto            inicio                          ;Desvia do vetor de inte
+                            rrupção
+                      00055 
+                      00056 ; --- Vetor de Interrupção ---
+0004                  00057                                 org                     H'0004'                         ;Todas as interr
+                            upções apontam para este endereço
+0004   0009           00058                                 retfie                                                  ;Retorna de inte
+                            rrupção
+                      00059 
+                      00060 
+                      00061 ; --- Programa Principal ---
+0005                  00062 inicio:
+0005   1683           00063                                 bank1                                                   ;Seleciona o ban
+                            co 1 de memória
+0006   30FF           00064                                 movlw           H'FF'                           ;W = B'1111 1111'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0007   0085           00065                                 movwf           TRISA                           ;TRISA = H'FF' (todos os
+                             bits são entrada)
+0008   30F5           00066                                 movlw           h'F5'                           ;W = B'1111 0101'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   0086           00067                                 movwf           TRISB                           ;TRISB = H'F5' configura
+                             RB1 e RB3 como saida)
+000A   1283           00068                                 bank0                                                   ;Seleciona o ban
+                            co 0 de memória
+000B   30F5           00069                                 movlw           H'F5'                           ;W = B'1111 0101'
+000C   0086           00070                                 movwf           PORTB                           ;LEDs iniciam desligados
+                      00071 
+000D                  00072 loop:                                                                                   ;Loop infinito
+000D   2010           00073                                 call            trata_but1                      ;Chama a sub-rotina para
+                             tratar botão 1
+000E   2016           00074                                 call            trata_but2                      ;chama a sub-rotina para
+                             tratar botão 2
+                      00075 
+000F   280D           00076                                 goto            loop                            ;Volta para label loop
+                      00077 
+                      00078 ; --- Desenvolvimento das Sub-Rotinas ---
+                      00079 
+                      00080 ; --- Sub-Rotina para tratar botão 1 ---
+0010                  00081 trata_but1:
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0010   1806           00082                                 btfsc           botao1                          ;Botao foi pressionado?
+0011   2814           00083                                 goto            apaga_led1                      ;Não, desvia para lebel 
+                            apaga LED1
+0012   1486           00084                                 bsf                     led1                            ;Sim, liga led1
+0013   0008           00085                                 return                                                  ;Retorna da sub-
+                            rotina
+                      00086                         
+0014                  00087 apaga_led1:
+0014   1086           00088                                 bcf                     led1                            ;Apaga led1
+0015   0008           00089                                 return                                                  ;Retorna da sub-
+                            rotina
+                      00090 
+                      00091 ; --- Sub-Rotina para tratar botão 2 ---
+0016                  00092 trata_but2:                                                                             
+0016   1906           00093                                 btfsc           botao2                          ;Botao foi pressionado?
+0017   281A           00094                                 goto            apaga_led2                      ;Não, desvia para lebel 
+                            apaga LED2
+0018   1586           00095                                 bsf                     led2                            ;Sim, liga led2
+0019   0008           00096                                 return                                                  ;Retorna da sub-
+                            rotina
+                      00097                         
+001A                  00098 apaga_led2:
+001A   1186           00099                                 bcf                     led2                            ;Apaga led2
+001B   0008           00100                                 return                                                  ;Retorna da sub-
+                            rotina
+                      00101 
+                      00102                                 end                                                             ;final  
+                                    
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  4
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+C                                 00000000
+DC                                00000001
+EEADR                             00000009
+EECON1                            00000088
+EECON2                            00000089
+EEDATA                            00000008
+EEIE                              00000006
+EEIF                              00000004
+F                                 00000001
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_PD                            00000003
+NOT_RBPU                          00000007
+NOT_TO                            00000004
+OPTION_REG                        00000081
+PCL                               00000002
+PCLATH                            0000000A
+PORTA                             00000005
+PORTB                             00000006
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+STATUS                            00000003
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+TMR0                              00000001
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR0IE                            00000005
+TMR0IF                            00000002
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_CONFIG                           00002007
+_CP_OFF                           00003FFF
+_CP_ON                            0000000F
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FFD
+__16F84A                          00000001
+__DEBUG                           1
+apaga_led1                        00000014
+apaga_led2                        0000001A
+bank0                             bcf STATUS,RP0
+bank1                             bsf STATUS,RP0
+botao1                            PORTB,RB0
+botao2                            PORTB,RB2
+inicio                            00000005
+MPASM  5.51                SOURCE_FILE_04.ASM   4-25-2021  14:55:03         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+led1                              PORTB,RB1
+led2                              PORTB,RB3
+loop                              0000000D
+trata_but1                        00000010
+trata_but2                        00000016
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXX---- ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:    25
+Program Memory Words Free:   999
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     2 reported,     0 suppressed
+
+

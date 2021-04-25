@@ -1,8 +1,10 @@
 ;
 ; Curso de Assembly
 ;
+; 
+; Aciona LED1 ligado em RB1, a partir de um botão ligado em RB0 
+; Aciona LED2 ligado em RB3, a partir de um botão ligado em RB2
 ;
-; Aciona um LED ligado em RB7, a partir de um botão ligado em RB0
 ; Obs.:
 ;
 ; LED ligado no modo current sourcing:
@@ -39,10 +41,12 @@
 
 ; --- Entradas ---
 	#define		botao1		PORTB,RB0			;Botão 1 ligado em RB0
+	#define		botao2		PORTB,RB2			;Botão 2 ligado em RB2	
 
 
 ; --- Saídas ---
-	#define		led1		PORTB,RB7			;Led 1 ligado em RB7
+	#define		led1		PORTB,RB1			;Led 1 ligado em RB1
+	#define		led2		PORTB,RB3			;Led 3 ligado em RB3
 
 
 ; --- Vetor de RESET ---
@@ -57,23 +61,42 @@
 ; --- Programa Principal ---
 inicio:
 				bank1							;Seleciona o banco 1 de memória
-				movlw		H'FF'				;W = B'11111111'
+				movlw		H'FF'				;W = B'1111 1111'
 				movwf		TRISA				;TRISA = H'FF' (todos os bits são entrada)
-				movlw		h'7F'				;W = B'01111111'
-				movwf		TRISB				;TRISB = H'7F' (apenas o RB7 como saida)
+				movlw		h'F5'				;W = B'1111 0101'
+				movwf		TRISB				;TRISB = H'F5' configura RB1 e RB3 como saida)
 				bank0							;Seleciona o banco 0 de memória
-				movlw		H'FF'				;W = B'11111111'
-				movwf		PORTB				;RB7 (configurando como saída)	inicia em HIGH
+				movlw		H'F5'				;W = B'1111 0101'
+				movwf		PORTB				;LEDs iniciam desligados
 
-loop:
-		
+loop:											;Loop infinito
+				call		trata_but1			;Chama a sub-rotina para tratar botão 1
+				call		trata_but2			;chama a sub-rotina para tratar botão 2
+
+				goto		loop				;Volta para label loop
+
+; --- Desenvolvimento das Sub-Rotinas ---
+
+; --- Sub-Rotina para tratar botão 1 ---
+trata_but1:
 				btfsc		botao1				;Botao foi pressionado?
 				goto		apaga_led1			;Não, desvia para lebel apaga LED1
 				bsf			led1				;Sim, liga led1
-				goto		loop				;volta para label loop
+				return							;Retorna da sub-rotina
 			
 apaga_led1:
 				bcf			led1				;Apaga led1
-				goto		loop				;Volta para label loop
+				return							;Retorna da sub-rotina
+
+; --- Sub-Rotina para tratar botão 2 ---
+trata_but2:										
+				btfsc		botao2				;Botao foi pressionado?
+				goto		apaga_led2			;Não, desvia para lebel apaga LED2
+				bsf			led2				;Sim, liga led2
+				return							;Retorna da sub-rotina
+			
+apaga_led2:
+				bcf			led2				;Apaga led2
+				return							;Retorna da sub-rotina
 
 				end								;final		

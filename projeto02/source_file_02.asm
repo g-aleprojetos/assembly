@@ -1,9 +1,8 @@
 ;
 ; Curso de Assembly
 ;
-;  *****   mudança do LED do RB7 para RB1 *****
 ;
-; Aciona um LED ligado em RB1, a partir de um botão ligado em RB0
+; Aciona um LED ligado em RB7, a partir de um botão ligado em RB0
 ; Obs.:
 ;
 ; LED ligado no modo current sourcing:
@@ -43,7 +42,7 @@
 
 
 ; --- Saídas ---
-	#define		led1		PORTB,RB1			;Led 1 ligado em RB1
+	#define		led1		PORTB,RB7			;Led 1 ligado em RB7
 
 
 ; --- Vetor de RESET ---
@@ -60,11 +59,11 @@ inicio:
 				bank1							;Seleciona o banco 1 de memória
 				movlw		H'FF'				;W = B'11111111'
 				movwf		TRISA				;TRISA = H'FF' (todos os bits são entrada)
-				movlw		h'FD'				;W = B'11111101'
-				movwf		TRISB				;TRISB = H'7F' (apenas o RB1 como saida)
+				movlw		h'7F'				;W = B'01111111'
+				movwf		TRISB				;TRISB = H'7F' (apenas o RB7 como saida)
 				bank0							;Seleciona o banco 0 de memória
-				movlw		H'FD'				;W = B'11111101'
-				movwf		PORTB				;RB1 (configurando como saída)	inicia em HIGH
+				movlw		H'FF'				;W = B'11111111'
+				movwf		PORTB				;RB7 (configurando como saída)	inicia em LOW
 
 loop:
 		

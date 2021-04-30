@@ -1,7 +1,7 @@
 ;
 ; Curso de Assembly
 ;
-; Instruções Aritméticas em Assembly
+; Instruções de Desvio Condicional 
 ;
 ; MCU: PIC16F84A   Clock:4MHz
 ;
@@ -65,21 +65,15 @@ inicio:
 
 loop:											;Loop infinito
 
-				movlw		D'10'				;Move a constante D'10' no registrador W
-				addlw		d'35'				;W = W + 35d, W = 10 + 35 = 45
+				movlw		B'00000000'			;W = 10
+				movwf		regist2				;regist2 = 10
+				
+aux:
+				
 
-				movlw		H'AC'				;Move a constante H'AC' para W
-				movwf		regist1				;regist1 = H'AC'
-
-				addwf		regist1,w			;w = regist1 + w
-
-				movlw		D'35'				;Move a constante D'35' no registrador W
-				sublw		D'10' 				;W = W - 10d, W = 35 - 10 = 35
-
-				movlw		H'AC'				;Move a constante H'AC' para W
-				movlw		regist2				;regist2 = H'AC'
-
-				subwf		regist2,w			;w = regist2 - w
+				btfsc		regist2,2			;Bit 2 do regist2 igual a zero?
+				goto		aux					;Não. Desvia para aux
+				goto		loop				;Sim. Desvia para loop
 			
 
 				goto		loop				;Volta para label loop
@@ -87,49 +81,45 @@ loop:											;Loop infinito
 
 				end								;final	
 
-; --- Instruções ---
-; ----------------------------------------------
+				
+
+;     INSTRUÇÕES:
+; ----------------------------------
 ;
-; ADDLW			k
+; DECFSZ	f,d
 ;
-; Operação: w = W + k
-;
-; ----------------------------------------------
-;
-; ADDWE			f,d
-;
-; Operação: d = W + f
-;
-; d = 0 (W)	ou d = 1 (f)
-;
-; -----------------------------------------------
-;
-; RLF			f,d
-;
-; Operação: d = f << 1 (rotaciona o registrador f um bit para esquerda 'multiplica')
-;
-; d = 0 (W) ou d = 1(f)
-;
-; -----------------------------------------------
-;
-; RRF			f,d
-;
-; Operação: d = f >> 1 (rotaciona o registrador f um bit para direita 'divide')
+; Decrementa f (d = f - 1) e desvia* se f = 0
 ;
 ; d = 0 (W) ou d = 1 (f)
 ;
-; ------------------------------------------------
+; ----------------------------------
 ;
-;SUBLW			k
+; INCFSZ	f,d
 ;
-; Operação: W = k - W
-;
-; ------------------------------------------------
-;
-; SUBWF			f,d
-;
-; Operação: d = f - W
+; Incrementa f (d = f + 1) e desvia* se f = 0
 ;
 ; d = 0 (W) ou d = 1 (f)
+;
+; ----------------------------------
+;
+; BTFSC		f,b
+;
+; Testa bit do registrador f, desvia* se igual a zero
+;
+;  
+;
+; ----------------------------------
+;
+; BTFSS		f,b
+;
+; Testa bit do registrador f, desvia* se igual a um
+;
+;  
+;
+; ----------------------------------
+;
+;
+;
+; * O mesmo que saltar a próxima linha
 ;
 ; ------------------------------------------------

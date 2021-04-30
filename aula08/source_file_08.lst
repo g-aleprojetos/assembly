@@ -1,4 +1,4 @@
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  1
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -7,7 +7,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00001 ;
                       00002 ; Curso de Assembly
                       00003 ;
-                      00004 ; Instruções Aritméticas em Assembly
+                      00004 ; Instruções de Desvio Condicional 
                       00005 ;
                       00006 ; MCU: PIC16F84A   Clock:4MHz
                       00007 ;
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00038         cblock                                  H'0C'                           ;inicio da memória do us
                             uário
                       00039 
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  2
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -104,40 +104,30 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
                       00065 
 000D                  00066 loop:                                                                                   ;Loop infinito
                       00067 
-000D   300A           00068                                 movlw           D'10'                           ;Move a constante D'10' 
-                            no registrador W
-000E   3E23           00069                                 addlw           d'35'                           ;W = W + 35d, W = 10 + 3
-                            5 = 45
-                      00070 
-000F   30AC           00071                                 movlw           H'AC'                           ;Move a constante H'AC' 
-                            para W
-0010   008C           00072                                 movwf           regist1                         ;regist1 = H'AC'
+000D   3000           00068                                 movlw           B'00000000'                     ;W = 10
+000E   008D           00069                                 movwf           regist2                         ;regist2 = 10
+                      00070                                 
+000F                  00071 aux:
+                      00072                                 
                       00073 
-0011   070C           00074                                 addwf           regist1,w                       ;w = regist1 + w
-                      00075 
-0012   3023           00076                                 movlw           D'35'                           ;Move a constante D'35' 
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  3
+000F   190D           00074                                 btfsc           regist2,2                       ;Bit 2 do regist2 igual 
+                            a zero?
+0010   280F           00075                                 goto            aux                                     ;Não. Desvia par
+                            a aux
+0011   280D           00076                                 goto            loop                            ;Sim. Desvia para loop
+                      00077                         
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                            no registrador W
-0013   3C0A           00077                                 sublw           D'10'                           ;W = W - 10d, W = 35 - 1
-                            0 = 35
                       00078 
-0014   30AC           00079                                 movlw           H'AC'                           ;Move a constante H'AC' 
-                            para W
-0015   300D           00080                                 movlw           regist2                         ;regist2 = H'AC'
+0012   280D           00079                                 goto            loop                            ;Volta para label loop
+                      00080 
                       00081 
-0016   020D           00082                                 subwf           regist2,w                       ;w = regist2 - w
-                      00083                         
-                      00084 
-0017   280D           00085                                 goto            loop                            ;Volta para label loop
-                      00086 
-                      00087 
-                      00088                                 end                                                             ;final  
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  4
+                      00082                                 end                                                             ;final  
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  4
 
 
 SYMBOL TABLE
@@ -196,7 +186,7 @@ T0IE                              00000005
 T0IF                              00000002
 T0SE                              00000004
 TMR0                              00000001
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  5
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  5
 
 
 SYMBOL TABLE
@@ -248,19 +238,20 @@ _WDT_ON                           00003FFF
 _XT_OSC                           00003FFD
 __16F84A                          00000001
 __DEBUG                           1
+aux                               0000000F
 bank0                             bcf STATUS,RP0
 bank1                             bsf STATUS,RP0
 botao1                            PORTB,RB0
 botao2                            PORTB,RB2
 inicio                            00000005
 led1                              PORTB,RB1
-led2                              PORTB,RB3
-MPASM  5.51                SOURCE_FILE_07.ASM   4-30-2021  9:18:15         PAGE  6
+MPASM  5.51                SOURCE_FILE_08.ASM   4-30-2021  9:46:21         PAGE  6
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+led2                              PORTB,RB3
 loop                              0000000D
 regist1                           0000000C
 regist2                           0000000D
@@ -268,13 +259,13 @@ regist2                           0000000D
 
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
-0000 : X---XXXXXXXXXXXX XXXXXXXX-------- ---------------- ----------------
+0000 : X---XXXXXXXXXXXX XXX------------- ---------------- ----------------
 2000 : -------X-------- ---------------- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:    21
-Program Memory Words Free:  1003
+Program Memory Words Used:    16
+Program Memory Words Free:  1008
 
 
 Errors   :     0

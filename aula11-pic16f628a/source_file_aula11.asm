@@ -31,4 +31,28 @@
 		#define		bank0		bcf STATUS,RP0			;Cria um mnemônico para selecionar o bank0 de memória
 		#define		bank1		bsf STATUS,RP0			;Cria um mnemônico para selecionar o bank1 de memória
 
-		end												;Final do programa
+; --- Vetor de Reset ---
+		org			H'0000'								;Origem no endereço 00h de memória
+		goto		inicio								;Desvia para a label Início
+
+; --- Vetor de interrupção ---
+		org			H'0004'								;As interrupções deste processador apontam para esse endereço
+		retfie											;Retorna da interrupção
+
+inicio:
+	bank0												;Seleciona o banco 0 na memória
+	movlw			H'07'								;w = 7h
+	movwf			CMCON								;CMCON	= 7h
+	bank1												;Seleciona o banco 1 na memória
+	movlw			H'00'								;w = 00h
+	movwf			TRISB								;Configura todo o PORTB como saída digital
+	bank0												;Seleciona o banco 0 na memória
+	movlw			H'00'								;w = 00h
+	movwf			PORTB								;Inicializa PORTB todo em low
+
+loop:
+
+	goto 			loop								;loop infinito
+
+
+	end													;Final do programa

@@ -1,4 +1,4 @@
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  1
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -53,9 +53,51 @@ Message[301]: MESSAGE: (Processor-header file mismatch.  Verify selected process
                       00032                 #define         bank1           bsf STATUS,RP0                  ;Cria um mnemônico para 
                             selecionar o bank1 de memória
                       00033 
-                      00034                 end                                                                                     
+                      00034 ; --- Vetor de Reset ---
+0000                  00035                 org                     H'0000'                                                         
+                            ;Origem no endereço 00h de memória
+0000   2805           00036                 goto            inicio                                                          ;Desvia 
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                            para a label Início
+                      00037 
+                      00038 ; --- Vetor de interrupção ---
+0004                  00039                 org                     H'0004'                                                         
+                            ;As interrupções deste processador apontam para esse endereço
+0004   0009           00040                 retfie                                                                                  
+                            ;Retorna da interrupção
+                      00041 
+0005                  00042 inicio:
+0005   1283           00043         bank0                                                                                           
+                            ;Seleciona o banco 0 na memória
+0006   3007           00044         movlw                   H'07'                                                           ;w = 7h
+0007   009F           00045         movwf                   CMCON                                                           ;CMCON  
+                            = 7h
+0008   1683           00046         bank1                                                                                           
+                            ;Seleciona o banco 1 na memória
+0009   3000           00047         movlw                   H'00'                                                           ;w = 00h
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0086           00048         movwf                   TRISB                                                           ;Configu
+                            ra todo o PORTB como saída digital
+000B   1283           00049         bank0                                                                                           
+                            ;Seleciona o banco 0 na memória
+000C   3000           00050         movlw                   H'00'                                                           ;w = 00h
+000D   0086           00051         movwf                   PORTB                                                           ;Inicial
+                            iza PORTB todo em low
+                      00052 
+000E                  00053 loop:
+                      00054 
+000E   280E           00055         goto                    loop                                                            ;loop in
+                            finito
+                      00056 
+                      00057 
+                      00058         end                                                                                             
                                     ;Final do programa
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  2
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  3
 
 
 SYMBOL TABLE
@@ -114,7 +156,7 @@ NOT_BOD                           00000000
 NOT_BOR                           00000000
 NOT_PD                            00000003
 NOT_POR                           00000001
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  3
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  4
 
 
 SYMBOL TABLE
@@ -173,7 +215,7 @@ STATUS                            00000003
 SYNC                              00000004
 T0CS                              00000005
 T0IE                              00000005
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  4
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  5
 
 
 SYMBOL TABLE
@@ -232,7 +274,7 @@ TXIE                              00000004
 TXIF                              00000004
 TXREG                             00000019
 TXSTA                             00000098
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  5
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  6
 
 
 SYMBOL TABLE
@@ -291,7 +333,7 @@ _PWRTE_ON                         00003FF7
 _RC_OSC_CLKOUT                    00003FFF
 _RC_OSC_NOCLKOUT                  00003FFE
 _WDTE_OFF                         00003FFB
-MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-24-2021  17:42:12         PAGE  6
+MPASM  5.51            SOURCE_FILE_AULA11.ASM   6-28-2021  19:51:28         PAGE  7
 
 
 SYMBOL TABLE
@@ -305,20 +347,23 @@ __16F628                          00000001
 __DEBUG                           1
 bank0                             bcf STATUS,RP0
 bank1                             bsf STATUS,RP0
+inicio                            00000005
+loop                              0000000E
 
 
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
+0000 : X---XXXXXXXXXXX- ---------------- ---------------- ----------------
 2000 : -------X-------- ---------------- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:     0
-Program Memory Words Free:  2048
+Program Memory Words Used:    12
+Program Memory Words Free:  2036
 
 
 Errors   :     0
 Warnings :     1 reported,     0 suppressed
-Messages :     1 reported,     0 suppressed
+Messages :     2 reported,     0 suppressed
 
 
